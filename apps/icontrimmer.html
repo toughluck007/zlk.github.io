@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/zlk-base.css">
+
+<style>
+.container {
+    padding: 15px;
+}
+
+.dropzone {
+    border: 2px dashed #555;
+    background: #f0f0f0;
+    height: 220px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+}
+
+canvas {
+    max-width: 100%;
+    margin-bottom: 10px;
+    background: white;
+}
+
+.controls {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>ICON TRIMMER 2003</h2>
+
+<div class="dropzone" id="dropzone">
+    Drag & Drop Image Here
+</div>
+
+<canvas id="canvas"></canvas>
+
+<div class="controls">
+    <div>
+        Tolerance:
+        <input type="range" id="tolerance" min="0" max="100" value="10">
+    </div>
+
+    <div>
+        Padding (px):
+        <input type="number" id="padding" value="0" min="0">
+    </div>
+
+    <div>
+        Alpha Threshold:
+        <input type="range" id="alphaThreshold" min="0" max="255" value="10">
+    </div>
+
+    <div>
+        <label>
+            <input type="checkbox" id="forceSquare">
+            Force Square
+        </label>
+    </div>
+
+    <div>
+        <button id="sampleBg">Sample Background</button>
+    </div>
+
+    <div>
+        <button id="trim">Trim Image</button>
+    </div>
+
+    <div>
+        <button id="download">Download PNG</button>
+    </div>
+</div>
+
+</div>
+
+<script>
+
+const dropzone = document.getElementById("dropzone");
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+
+const toleranceSlider = document.getElementById("tolerance");
+const paddingInput = document.getElementById("padding");
+const alphaSlider = document.getElementById("alphaThreshold");
+const forceSquareCheckbox = document.getElementById("forceSquare");
+
+let img = new Image();
+let bgColor = null;
+let originalFileName = "trimmed";
+
+dropzone.addEventListener("dragover", e => e.preventDefault());
+
+dropzone.addEventListener("drop", e => {
+    e.preventDefault();
+    const file = e.dataTransfer.files[0];
+    if (!file) return;
+
+    originalFileName = file.name.replace(/\.[^/.]+$/, "");
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+        img.onload = function() {
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+        }
+        img.src = event.target.result;
+    };
+    reader.readAsDataURL(file);
+});
+
+document.getElementById("sampleBg").onclick = () => {
+    alert("Click background color in the image.");
+    canvas.onclick = function(e) {
+        const rect = canvas.getBoundingClientRect();
+        const x = Math.floor((e.clientX - rect.left) * (canvas.width / rect.width));
+        const y = Math.floor((e.clientY - rect.top) * (canvas.height / rect.height));
+        const pixel = ctx.getImageData(x, y, 1, 1).data;
+        bgColor = pixel;
+        alert("Background color sampled.");
+        canvas.onclick = null;
+    };
+};
+
+document.getElementById("trim").onclick = () => trimImage();
+
+document.getElementById("download").onclick = () => {
+    const link = document.createElement("a");
+    link.download = originalFileName + "-trimmed.png";
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+};
+
+function trimImage() {
+
+    const tolerance = parseInt(toleranceSlider.value);
+    const padding = parseInt(paddingInput.value);
+    const alphaThreshold = parseInt(alphaSlider.value);
+    const forceSquare = forceSquareCheckbox.checked;
+
+    const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const data = imageData.data;
+
+    let hasTransparency = false;
+
+    for (let i = 3; i < data.length; i += 4) {
+        if (data[i] < 255) {
+            hasTransparency = true;
+            break;
+        }
+    }
+
+    let top = canvas.height, bottom = 0, left = canvas.width, right = 0;
+
+    function isContent(r, g, b, a) {
+
+        if (hasTransparency) {
+            return a > alphaThreshold;
+        }
+
+        if (!bgColor) return true;
+
+        const dr = Math.abs(r - bgColor[0]);
+        const dg = Math.abs(g - bgColor[1]);
+        const db = Math.abs(b - bgColor[2]);
+
+        return (dr > tolerance || dg > tolerance || db > tolerance);
+    }
+
+    for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+
+            const index = (y * canvas.width + x) * 4;
+            const r = data[index];
+            const g = data[index+1];
+            const b = data[index+2];
+            const a = data[index+3];
+
+            if (isContent(r,g,b,a)) {
+                top = Math.min(top, y);
+                bottom = Math.max(bottom, y);
+                left = Math.min(left, x);
+                right = Math.max(right, x);
+            }
+        }
+    }
+
+    if (right <= left || bottom <= top) return;
+
+    top -= padding;
+    left -= padding;
+    bottom += padding;
+    right += padding;
+
+    top = Math.max(0, top);
+    left = Math.max(0, left);
+    bottom = Math.min(canvas.height, bottom);
+    right = Math.min(canvas.width, right);
+
+    let width = right - left;
+    let height = bottom - top;
+
+    if (forceSquare) {
+        const size = Math.max(width, height);
+
+        const centerX = left + width / 2;
+        const centerY = top + height / 2;
+
+        left = Math.max(0, Math.floor(centerX - size / 2));
+        top = Math.max(0, Math.floor(centerY - size / 2));
+
+        if (left + size > canvas.width) left = canvas.width - size;
+        if (top + size > canvas.height) top = canvas.height - size;
+
+        width = size;
+        height = size;
+    }
+
+    const newImage = ctx.getImageData(left, top, width, height);
+
+    canvas.width = width;
+    canvas.height = height;
+    ctx.putImageData(newImage, 0, 0);
+}
+
+</script>
+
+</body>
+</html>

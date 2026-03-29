@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/zlk-base.css">
+
+<style>
+.container {
+    padding: 15px;
+}
+
+.top {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 12px;
+}
+
+.logo {
+    width: 95px;
+}
+
+.section {
+    border: 2px solid #808080;
+    background: #f0f0f0;
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+.grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 200px;
+    gap: 15px;
+    align-items: center;
+}
+
+.small {
+    font-size: 12px;
+}
+
+.clock {
+    text-align: center;
+}
+
+canvas {
+    background: white;
+    border: 2px solid #808080;
+}
+
+.banner {
+    width: 100%;
+    height: 90px;
+    border: 2px solid #808080;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    cursor: pointer;
+}
+
+.ad-text {
+    font-family: "Comic Sans MS", cursive, sans-serif;
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+
+    background: linear-gradient(
+        90deg,
+        red,
+        orange,
+        yellow,
+        green,
+        cyan,
+        blue,
+        violet
+    );
+    background-size: 400%;
+
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+
+    animation:
+        rainbow 6s linear infinite,
+        breathe 4s ease-in-out infinite;
+}
+
+@keyframes rainbow {
+    0% { background-position: 0% }
+    100% { background-position: 400% }
+}
+
+@keyframes breathe {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.15); }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="top">
+    <img src="../z.png" class="logo">
+    <div>
+        <strong>ZLK.ONE DASHBOARD</strong><br>
+        <span class="small">Desktop Environment v2.0</span>
+    </div>
+</div>
+
+<div class="section grid-2">
+
+    <div class="small">
+        <strong>Today</strong><br>
+        Date: <span id="date"></span><br>
+        Time: <span id="time"></span><br><br>
+
+        Screen: <span id="screen"></span><br>
+        Browser: <span id="browser"></span><br>
+        Installed Apps: 5
+    </div>
+
+    <div class="clock">
+        <canvas id="analogClock" width="160" height="160"></canvas>
+    </div>
+
+</div>
+
+<div class="section">
+    <strong>Sponsored By:</strong><br><br>
+    <div id="banner" class="banner">
+        Loading Sponsors...
+    </div>
+</div>
+
+<div class="section small">
+    System Message: <span id="message"></span>
+</div>
+
+</div>
+
+<script>
+
+// -------- DATE & TIME --------
+
+function updateTime() {
+    const now = new Date();
+    document.getElementById("date").textContent =
+        now.toLocaleDateString();
+    document.getElementById("time").textContent =
+        now.toLocaleTimeString();
+}
+setInterval(updateTime, 1000);
+updateTime();
+
+document.getElementById("screen").textContent =
+    window.innerWidth + "x" + window.innerHeight;
+
+document.getElementById("browser").textContent =
+    navigator.userAgent.split(" ")[0];
+
+// -------- ANALOG CLOCK --------
+
+const canvas = document.getElementById("analogClock");
+const ctx = canvas.getContext("2d");
+const radius = canvas.height / 2;
+ctx.translate(radius, radius);
+
+function drawClock() {
+    ctx.clearRect(-radius, -radius, canvas.width, canvas.height);
+
+    ctx.beginPath();
+    ctx.arc(0, 0, radius - 5, 0, 2 * Math.PI);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+    ctx.stroke();
+
+    const now = new Date();
+    const hour = now.getHours() % 12;
+    const minute = now.getMinutes();
+    const second = now.getSeconds();
+
+    drawHand((hour + minute/60) * Math.PI/6, radius * 0.5, 4);
+    drawHand(minute * Math.PI/30, radius * 0.7, 3);
+    drawHand(second * Math.PI/30, radius * 0.8, 1);
+}
+
+function drawHand(angle, length, width) {
+    ctx.beginPath();
+    ctx.lineWidth = width;
+    ctx.moveTo(0,0);
+    ctx.rotate(angle);
+    ctx.lineTo(0, -length);
+    ctx.stroke();
+    ctx.rotate(-angle);
+}
+
+setInterval(drawClock, 1000);
+drawClock();
+
+// -------- FAKE SPONSORS --------
+
+const sponsors = [
+  "WinZip Trial Version",
+  "56k Dial-Up Elite",
+  "Generic Beige Tower Co.",
+  "Overclockers Anonymous",
+  "3dfx Voodoo Graphics",
+  "Clippy’s Legal Defense Fund",
+  "Screen Saver Enjoyers Union",
+  "The Recycle Bin (Empty)",
+  "IRQ Conflict Survivors",
+  "SCSI Terminator Appreciation Society",
+  "Norton Utilities (1999)",
+  "Netscape Navigator Support Group",
+  "Ask Jeeves Research Division",
+  "AltaVista Deep Index Team",
+  "Free AOL Trial CDs",
+  "The “Safely Remove Hardware” Prayer Circle",
+  "CTRL+ALT+DEL Enthusiasts",
+  "Defrag Weekend Warriors",
+  "The Readme.txt Preservation Society",
+  "Shareware Registration Reminder #37",
+  "“Do Not Turn Off Your Computer”",
+  "Microsoft Plus! Pack Nostalgia",
+  "Sound Blaster Driver Roulette",
+  "RealPlayer (Rhapsody Installed)",
+  "The Registry (Handle With Care)",
+  "Your Friendly Neighborhood Patch Cable",
+  "Thermal Paste Enthusiasts",
+  "The Button That Says Turbo",
+  "SYSTEM32",
+  "The Dreaded ‘Unknown Device’",
+  "‘Buffering…’",
+  "The Startup Sound (Max Volume)",
+  "“This Copy of Windows Is Not Genuine”",
+  "VGA 640×480 Loyalists",
+  "The Beige Keycap Consortium",
+  "QuickTime Alternatives Committee",
+  "The Pop-Up Blocker (Doing Its Best)",
+  "“One More Reboot Should Fix It”",
+  "The Space Bar (Well-Worn)",
+  "‘Press Any Key’ (Where’s Any?)",
+  "The Magic Smoke Containment Unit",
+  "“Have You Tried Turning It Off And On?”",
+  "The Ghost Of Internet Explorer 6",
+  "Null Modem Cable Collectors",
+  "The Unlicensed WinRAR Years (Respectfully)",
+  "“Trial Expired (But It Still Works)”",
+  "The LAN Party Snack Fund",
+  "The BIOS Beep Translator",
+  "Your Last Known Good Configuration"
+];
+
+let sponsorIndex = 0;
+
+const banner = document.getElementById("banner");
+const ad = document.createElement("div");
+ad.className = "ad-text";
+banner.innerHTML = "";
+banner.appendChild(ad);
+
+function rotateSponsor() {
+    ad.textContent = sponsors[sponsorIndex];
+    sponsorIndex = (sponsorIndex + 1) % sponsors.length;
+}
+
+setInterval(rotateSponsor, 5000);
+rotateSponsor();
+
+// -------- SYSTEM MESSAGE --------
+
+const messages = [
+    "All systems nominal.",
+    "No pending updates.",
+    "Clipboard empty.",
+    "Drive space acceptable.",
+    "Ready."
+];
+
+document.getElementById("message").textContent =
+    messages[Math.floor(Math.random() * messages.length)];
+
+</script>
+
+</body>
+</html>

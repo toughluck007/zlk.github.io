@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/zlk-base.css">
+
+<style>
+.container {
+    padding: 15px;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+.section {
+    border: 2px solid #808080;
+    background: #f0f0f0;
+    padding: 12px;
+    margin-bottom: 14px;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+input, select {
+    width: 100%;
+    padding: 4px;
+    border: 2px solid #808080;
+    background: white;
+    box-sizing: border-box;
+}
+
+.results {
+    border: 2px solid #808080;
+    background: white;
+    padding: 10px;
+    margin-top: 10px;
+    font-size: 13px;
+}
+
+.result-line {
+    margin-bottom: 6px;
+}
+
+.good { color: #006600; }
+.medium { color: #aa6600; }
+.bad { color: #990000; }
+
+.small {
+    font-size: 12px;
+    margin-top: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>TRANSFER TIME ESTIMATOR</h2>
+
+<div class="section">
+
+<div class="row">
+    <div>
+        <label>Data Size</label>
+        <input type="number" id="dataSize" value="100" min="0">
+    </div>
+
+    <div>
+        <label>Unit</label>
+        <select id="unit">
+            <option value="MB">MB</option>
+            <option value="GB" selected>GB</option>
+            <option value="TB">TB</option>
+        </select>
+    </div>
+</div>
+
+<div class="row">
+    <div>
+        <label>Media Type</label>
+        <select id="media">
+            <option value="usb2">USB 2.0 Flash Drive</option>
+            <option value="usb3">USB 3.0 Flash Drive</option>
+            <option value="hdd">Internal HDD (SATA)</option>
+            <option value="extHdd">External HDD (USB 3)</option>
+            <option value="sataSsd">SATA SSD</option>
+            <option value="nvme">NVMe SSD</option>
+            <option value="1gbe">1Gbps Network</option>
+            <option value="2.5gbe">2.5Gbps Network</option>
+            <option value="10gbe">10Gbps Network</option>
+            <option value="custom">Custom Speed</option>
+        </select>
+    </div>
+
+    <div>
+        <label>Custom Speed (MB/s)</label>
+        <input type="number" id="customSpeed" placeholder="Only used if Custom selected">
+    </div>
+</div>
+
+<button onclick="calculate()">Estimate</button>
+
+</div>
+
+<div class="results" id="results">
+Enter values and click Estimate.
+</div>
+
+</div>
+
+<script>
+
+const presets = {
+    usb2:     { worst: 5,   avg: 20,   best: 35 },
+    usb3:     { worst: 20,  avg: 80,   best: 150 },
+    hdd:      { worst: 80,  avg: 150,  best: 220 },
+    extHdd:   { worst: 60,  avg: 130,  best: 200 },
+    sataSsd:  { worst: 300, avg: 450,  best: 550 },
+    nvme:     { worst: 800, avg: 2500, best: 3500 },
+    "1gbe":   { worst: 80,  avg: 110,  best: 125 },
+    "2.5gbe": { worst: 200, avg: 280,  best: 300 },
+    "10gbe":  { worst: 600, avg: 900,  best: 1100 }
+};
+
+function convertToMB(value, unit) {
+    if (unit === "GB") return value * 1024;
+    if (unit === "TB") return value * 1024 * 1024;
+    return value;
+}
+
+function formatTime(seconds) {
+    seconds = Math.round(seconds);
+
+    const days = Math.floor(seconds / 86400);
+    seconds %= 86400;
+
+    const hours = Math.floor(seconds / 3600);
+    seconds %= 3600;
+
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+
+    let result = "";
+
+    if (days) result += days + "d ";
+    if (hours) result += hours + "h ";
+    if (minutes) result += minutes + "m ";
+    if (secs && days === 0) result += secs + "s";
+
+    return result.trim() || "0s";
+}
+
+function calculate() {
+
+    const sizeValue = parseFloat(document.getElementById("dataSize").value) || 0;
+    const unit = document.getElementById("unit").value;
+    const media = document.getElementById("media").value;
+    const customSpeed = parseFloat(document.getElementById("customSpeed").value);
+
+    const totalMB = convertToMB(sizeValue, unit);
+
+    let worst, avg, best;
+
+    if (media === "custom") {
+        if (!customSpeed || customSpeed <= 0) {
+            document.getElementById("results").innerHTML =
+                "<span class='bad'>Enter a valid custom speed.</span>";
+            return;
+        }
+        worst = avg = best = customSpeed;
+    } else {
+        const p = presets[media];
+        worst = p.worst;
+        avg = p.avg;
+        best = p.best;
+    }
+
+    const worstTime = formatTime(totalMB / worst);
+    const avgTime = formatTime(totalMB / avg);
+    const bestTime = formatTime(totalMB / best);
+
+    document.getElementById("results").innerHTML = `
+        <div class="result-line bad"><strong>Worst Case:</strong> ${worstTime} (${worst} MB/s)</div>
+        <div class="result-line medium"><strong>Average:</strong> ${avgTime} (${avg} MB/s)</div>
+        <div class="result-line good"><strong>Best Case:</strong> ${bestTime} (${best} MB/s)</div>
+        <div class="small">Based on ${sizeValue} ${unit} (${Math.round(totalMB)} MB total)</div>
+    `;
+}
+
+</script>
+
+</body>
+</html>

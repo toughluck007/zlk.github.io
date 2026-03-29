@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/zlk-base.css">
+
+<style>
+
+.container {
+    padding: 0;
+    height: 100%;
+}
+
+.help-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    height: calc(100vh - 80px);
+}
+
+.tree {
+    border-right: 2px solid #808080;
+    background: #f0f0f0;
+    padding: 10px;
+    overflow-y: auto;
+    font-size: 13px;
+}
+
+.tree ul {
+    list-style: none;
+    padding-left: 16px;
+}
+
+.tree li {
+    margin: 3px 0;
+    cursor: pointer;
+}
+
+.tree li:hover {
+    background: #000080;
+    color: white;
+}
+
+.tree .folder {
+    font-weight: bold;
+}
+
+.content {
+    padding: 15px;
+    overflow-y: auto;
+}
+
+.content h1 {
+    margin-top: 0;
+}
+
+.content pre {
+    background: #e8e8e8;
+    border: 1px solid #808080;
+    padding: 10px;
+    overflow-x: auto;
+}
+
+.copy-btn {
+    float: right;
+    font-size: 11px;
+    cursor: pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<div class="help-layout">
+
+<!-- TREE NAV -->
+
+<div class="tree">
+
+<ul>
+<li class="folder">Windows
+    <ul>
+        <li onclick="loadDoc('example.md')">Flush DNS</li>
+        <li onclick="loadDoc('example.md')">Set Static IP</li>
+    </ul>
+</li>
+
+<li class="folder">Software
+    <ul>
+        <li onclick="loadDoc('example.md')">WinSCP</li>
+        <li onclick="loadDoc('example.md')">Rufus</li>
+    </ul>
+</li>
+
+<li class="folder">Networking
+    <ul>
+        <li onclick="loadDoc('example.md')">Basic Diagnostics</li>
+    </ul>
+</li>
+
+</ul>
+
+</div>
+
+<!-- CONTENT -->
+
+<div class="content" id="docContent">
+Loading documentation...
+</div>
+
+</div>
+
+</div>
+
+<script src="../js/marked.min.js"></script>
+
+<script>
+
+function loadDoc(file) {
+
+fetch("../docs/" + file)
+.then(r => r.text())
+.then(md => {
+
+let html = marked.parse(md);
+
+document.getElementById("docContent").innerHTML = html;
+
+addCopyButtons();
+
+});
+
+}
+
+function addCopyButtons() {
+
+document.querySelectorAll("pre").forEach(block => {
+
+let btn = document.createElement("button");
+btn.textContent = "Copy";
+btn.className = "copy-btn";
+
+btn.onclick = () => {
+navigator.clipboard.writeText(block.innerText);
+};
+
+block.prepend(btn);
+
+});
+
+}
+
+// load default
+loadDoc("example.md");
+
+</script>
+
+</body>
+</html>

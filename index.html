@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ZLK.ONE</title>
+
+<link rel="stylesheet" href="css/zlk-base.css">
+
+<style>
+:root {
+    --desktop-bg: #008080;
+
+    --titlebar-start: #000080;
+    --titlebar-end: #1084d0;
+}
+
+body {
+    background: var(--desktop-bg);
+}
+
+.desktop {
+    display: flex;
+    height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+    gap: 20px;
+}
+
+.sidebar {
+    width: 220px;
+    background: #c0c0c0;
+    border: 3px solid #000;
+    box-shadow: 6px 6px 0px #000;
+    padding: 10px;
+}
+
+.sidebar h3 {
+    margin-top: 0;
+    font-size: 14px;
+}
+
+.nav-button {
+    display: block;
+    width: 100%;
+    margin-bottom: 6px;
+    text-align: left;
+}
+
+.window {
+    flex: 1;
+    background: #c0c0c0;
+    border: 3px solid #000;
+    box-shadow: 6px 6px 0px #000;
+    display: flex;
+    flex-direction: column;
+}
+
+.titlebar {
+    background: linear-gradient(
+        to right,
+        var(--titlebar-start),
+        var(--titlebar-end)
+    );
+    color: white;
+    padding: 4px 8px;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+.menubar {
+    background: #c0c0c0;
+    padding: 4px 6px;
+    border-bottom: 2px solid #808080;
+}
+
+.content {
+    flex: 1;
+    background: #e0e0e0;
+}
+
+.content iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+.statusbar {
+    background: #c0c0c0;
+    border-top: 2px solid #808080;
+    padding: 3px 6px;
+    font-size: 11px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="desktop">
+
+    <div class="sidebar">
+        <h3>ZLK.ONE</h3>
+
+        <button class="nav-button" onclick="loadApp('home.html','START.EXE')">Home</button>
+        <button class="nav-button" onclick="loadApp('qrcode.html','MASAHIRO.EXE')">QR Generator</button>
+        <button class="nav-button" onclick="loadApp('base64.html','BASED64.EXE')">Base64 Tool</button>
+		<button class="nav-button" onclick="loadApp('icontrimmer.html','PIXELRECYCLER.EXE')">Icon Trimmer</button>
+        <button class="nav-button" onclick="loadApp('anglecalc.html','FLIPPO.EXE')">Angle Calculator</button>
+		<button class="nav-button" onclick="loadApp('transfertime.html','COPYTIME.EXE')">Data Transfer Estimator</button>
+        <button class="nav-button" onclick="loadApp('links.html','BOOKMARKS.EXE')">Link Lair</button>
+        <button class="nav-button" onclick="loadApp('help.html','COMPUTERBIBLE.EXE')">Help Book</button>
+
+    </div>
+
+    <div class="window">
+
+        <div class="titlebar" id="appTitle">
+            START.EXE
+        </div>
+
+    <div class="menubar" id="menubar">
+
+    <div class="menu-item" onclick="toggleMenu('fileMenu', this)">File</div>
+    <div class="menu-item" onclick="toggleMenu('editMenu', this)">Edit</div>
+    <div class="menu-item" onclick="toggleMenu('viewMenu', this)">View</div>
+    <div class="menu-item" onclick="toggleMenu('helpMenu', this)">Help</div>
+
+    <!-- FILE -->
+    <div class="dropdown" id="fileMenu">
+        <div onclick="reloadApp()">Reload App</div>
+        <div onclick="openNewWindow()">Open in New Window</div>
+        <div onclick="closeApp()">Close App</div>
+    </div>
+
+    <!-- EDIT -->
+    <div class="dropdown" id="editMenu">
+        <div onclick="copyPageURL()">Copy Page URL</div>
+        <div onclick="clearCurrentApp()">Clear Current App</div>
+    </div>
+
+    <!-- VIEW -->
+    <div class="dropdown" id="viewMenu">
+
+        <div class="submenu-title">Wallpaper</div>
+        <div onclick="setWallpaper('#008080')">Teal Horizon</div>
+        <div onclick="setWallpaper('#000000')">Midnight Mode</div>
+        <div onclick="setWallpaper('#202060')">Deep Space Blue</div>
+
+        <div class="submenu-title">Titlebar Theme</div>
+        <div onclick="setTheme('#000080','#1084d0')">Corporate Blue</div>
+        <div onclick="setTheme('#800040','#ff4fa3')">Executive Magenta</div>
+        <div onclick="setTheme('#004d00','#00cc66')">Enterprise Green</div>
+        <div onclick="setTheme('#333','#888')">Monochrome Steel</div>
+
+    </div>
+
+    <!-- HELP -->
+    <div class="dropdown" id="helpMenu">
+        <div onclick="loadApp('about.html','ABOUT ZLK.ONE')">About...</div>
+    </div>
+
+</div>
+
+        <div class="content">
+            <iframe id="appFrame" src="apps/home.html"></iframe>
+        </div>
+
+        <div class="statusbar">
+            ZLK.ONE Desktop Environment v2.0
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+function loadApp(file, title) {
+    document.getElementById("appFrame").src = "apps/" + file;
+    document.getElementById("appTitle").textContent = title;
+}
+
+// --- MENU SYSTEM ---
+
+function toggleMenu(menuId, el) {
+
+    const menu = document.getElementById(menuId);
+    const alreadyOpen = menu.style.display === "flex";
+
+    closeAllMenus();
+
+    if (alreadyOpen) return;
+
+    menu.style.display = "flex";
+    el.classList.add("active");
+
+    // Anchor directly under the clicked menu item
+    menu.style.left = el.offsetLeft + "px";
+}
+
+function closeAllMenus() {
+    document.querySelectorAll(".dropdown").forEach(d => {
+        d.style.display = "none";
+    });
+    document.querySelectorAll(".menu-item").forEach(m => {
+        m.classList.remove("active");
+    });
+}
+
+document.addEventListener("click", function(e) {
+    if (!e.target.closest(".menubar")) {
+        closeAllMenus();
+    }
+});
+
+// --- FILE MENU ---
+
+function reloadApp() {
+    const frame = document.getElementById("appFrame");
+    frame.src = frame.src;
+    closeAllMenus();
+}
+
+function openNewWindow() {
+    const frame = document.getElementById("appFrame");
+    window.open(frame.src, "_blank");
+    closeAllMenus();
+}
+
+function closeApp() {
+    loadApp('home.html','Home');
+    closeAllMenus();
+}
+
+// --- EDIT MENU ---
+
+function copyPageURL() {
+    navigator.clipboard.writeText(window.location.href);
+    closeAllMenus();
+}
+
+function clearCurrentApp() {
+    const frame = document.getElementById("appFrame");
+    frame.contentWindow.location.reload();
+    closeAllMenus();
+}
+
+// --- VIEW MENU ---
+
+function setWallpaper(color) {
+    document.documentElement.style.setProperty('--desktop-bg', color);
+    closeAllMenus();
+}
+
+function setTheme(start, end) {
+    document.documentElement.style.setProperty('--titlebar-start', start);
+    document.documentElement.style.setProperty('--titlebar-end', end);
+    closeAllMenus();
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<link rel="stylesheet" href="../css/zlk-base.css">
+
+<style>
+.container {
+    padding: 15px;
+}
+
+h2 {
+    margin-top: 0;
+}
+
+.section {
+    border: 2px solid #808080;
+    background: #f0f0f0;
+    padding: 12px;
+    margin-bottom: 14px;
+}
+
+label {
+    display: block;
+    margin-bottom: 4px;
+    font-weight: bold;
+}
+
+input[type=number] {
+    width: 120px;
+    padding: 4px;
+    border: 2px solid #808080;
+    background: white;
+}
+
+.buttons {
+    margin-top: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.result {
+    font-weight: bold;
+    color: #006600;
+}
+
+.description {
+    font-size: 12px;
+    margin-top: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h2>LIVERY ANGLE CALCULATOR</h2>
+
+<div class="section">
+
+    <strong>180° Flip</strong>
+
+    <label for="angle180">Original Angle (deg)</label>
+    <input id="angle180" type="number" step="0.1" placeholder="eg. 37.5">
+
+    <div class="buttons">
+        <button onclick="calcFlip()">Calculate</button>
+        <button onclick="copyResult('result180')">Copy</button>
+        <span id="result180" class="result"></span>
+    </div>
+
+    <div class="description">
+        Returns the angle for the opposite side when artwork is flipped 180°.
+    </div>
+
+</div>
+
+<div class="section">
+
+    <strong>90° Rotation</strong>
+
+    <label for="angleRotate">Starting Angle (deg)</label>
+    <input id="angleRotate" type="number" step="0.1" placeholder="eg. 140">
+
+    <div class="buttons">
+        <button onclick="calcRotate()">Calculate</button>
+        <button onclick="copyResult('resultRotate')">Copy</button>
+        <span id="resultRotate" class="result"></span>
+    </div>
+
+    <div class="description">
+        Adds or subtracts 90° based on starting angle.
+        (0–180 add 90°, otherwise subtract 90°.)
+    </div>
+
+</div>
+
+</div>
+
+<script>
+
+// 180° flip
+function calcFlip() {
+    const angle = parseFloat(document.getElementById('angle180').value) || 0;
+    const result = (540 - angle) % 360;
+    document.getElementById('result180').textContent =
+        result.toFixed(1) + "°";
+}
+
+// 90° rotate
+function calcRotate() {
+    const angle = parseFloat(document.getElementById('angleRotate').value) || 0;
+    let result;
+
+    if (angle >= 0 && angle < 180) {
+        result = angle + 90;
+    } else {
+        result = angle - 90;
+    }
+
+    result = (result + 360) % 360;
+
+    document.getElementById('resultRotate').textContent =
+        result.toFixed(1) + "°";
+}
+
+// Copy to clipboard
+function copyResult(id) {
+    const text = document.getElementById(id).textContent;
+    if (text) {
+        navigator.clipboard.writeText(text);
+    }
+}
+
+// Enter key triggers
+document.getElementById('angle180').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') calcFlip();
+});
+
+document.getElementById('angleRotate').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') calcRotate();
+});
+
+</script>
+
+</body>
+</html>
