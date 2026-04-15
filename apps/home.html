@@ -47,7 +47,7 @@ canvas {
     border: 2px solid #808080;
 }
 
-.banner {
+.parody-showcase {
     width: 100%;
     height: 90px;
     border: 2px solid #808080;
@@ -59,7 +59,7 @@ canvas {
     cursor: pointer;
 }
 
-.ad-text {
+.parody-text {
     font-family: "Comic Sans MS", cursive, sans-serif;
     font-size: 24px;
     font-weight: bold;
@@ -119,8 +119,8 @@ canvas {
 </div>
 
 <div class="section">
-    <strong>Sponsored By:</strong><br><br>
-    <div id="banner" class="banner"></div>
+    <strong>Brought to you by:</strong><br><br>
+    <div id="parodyShowcase" class="parody-showcase"></div>
 </div>
 
 <div class="section small">
@@ -188,9 +188,9 @@ function drawHand(angle, length, width) {
 setInterval(drawClock, 1000);
 drawClock();
 
-// -------- FAKE SPONSORS --------
+// -------- PARODY SPONSORS --------
 
-const sponsors = [
+const parodySponsors = [
   "WinZip Trial Version",
   "56k Dial-Up Elite",
   "Generic Beige Tower Co.",
@@ -242,21 +242,21 @@ const sponsors = [
   "Your Last Known Good Configuration"
 ];
 
-let sponsorIndex = 0;
+let parodyIndex = 0;
 
-const banner = document.getElementById("banner");
-const ad = document.createElement("div");
-ad.className = "ad-text";
-banner.innerHTML = "";
-banner.appendChild(ad);
+const parodyShowcase = document.getElementById("parodyShowcase");
+const parodyLabel = document.createElement("div");
+parodyLabel.className = "parody-text";
+parodyShowcase.innerHTML = "";
+parodyShowcase.appendChild(parodyLabel);
 
-function rotateSponsor() {
-    ad.textContent = sponsors[sponsorIndex];
-    sponsorIndex = (sponsorIndex + 1) % sponsors.length;
+function rotateParodySponsor() {
+    parodyLabel.textContent = parodySponsors[parodyIndex];
+    parodyIndex = (parodyIndex + 1) % parodySponsors.length;
 }
 
-setInterval(rotateSponsor, 5000);
-rotateSponsor();
+setInterval(rotateParodySponsor, 5000);
+rotateParodySponsor();
 
 // -------- SYSTEM MESSAGE --------
 
