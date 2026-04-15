@@ -64,25 +64,16 @@ canvas {
     font-size: 24px;
     font-weight: bold;
     text-align: center;
+    display: inline-block; /* Helps the clipping engine stay stable */
 
-    background: linear-gradient(
-        90deg,
-        red,
-        orange,
-        yellow,
-        green,
-        cyan,
-        blue,
-        violet
-    );
+    background: linear-gradient(90deg, red, orange, yellow, green, cyan, blue, violet);
     background-size: 400%;
 
     -webkit-background-clip: text;
+    background-clip: text; /* Standard property */
     -webkit-text-fill-color: transparent;
 
-    animation:
-        rainbow 6s linear infinite,
-        breathe 4s ease-in-out infinite;
+    animation: rainbow 6s linear infinite;
 }
 
 @keyframes rainbow {
